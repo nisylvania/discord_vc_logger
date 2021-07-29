@@ -23,6 +23,9 @@ async def on_voice_state_update(member, before, after):
             color=0x00ff00,
             description="<#" + str(after.channel.id) + ">に<@!" + str(member.id) + ">が参加しました。"
         )
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="参加チャンネル",value="<#" + str(after.channel.id) + ">")
+        embed.add_field(name="参加者", value="<@!" + str(member.id) + ">")
         embed.set_footer(text="Made by のぶ, ばにあ")
 
         if after.channel is not None:
