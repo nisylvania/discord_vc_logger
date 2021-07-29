@@ -26,7 +26,7 @@ async def on_voice_state_update(member, before, after):
         embed.set_footer(text="Made by のぶ, ばにあ")
 
         if after.channel is not None:
-            await bot.get_channel(RoomID).send(embed=embed)
+            await bot.get_channel(int(RoomID)).send(embed=embed)
 
 
 if __name__ == "__main__":
