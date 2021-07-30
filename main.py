@@ -20,10 +20,10 @@ async def on_voice_state_update(member, before, after):
         if before.channel != after.channel:
             RoomID = member.guild.system_channel.id
             embed = discord.Embed(
-                title="VC入室通知",
                 color=member.color
             )
-            embed.set_thumbnail(url=member.avatar_url)
+            embed.set_author(name=member.name + 'がVCに入室',
+                            icon_url=member.avatar_url)
             embed.add_field(name="参加チャンネル", value="<#" +
                             str(after.channel.id) + ">")
             embed.add_field(name="参加者", value="<@!" + str(member.id) + ">")
