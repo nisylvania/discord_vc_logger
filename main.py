@@ -22,12 +22,10 @@ async def on_voice_state_update(member, before, after):
             embed = discord.Embed(
                 color=member.color
             )
-            embed.set_author(name=member.name + 'がVCに入室',
+            embed.set_author(name=member.name + 'がVCに入室しました',
                             icon_url=member.avatar_url)
             embed.add_field(name="参加チャンネル", value="<#" +
                             str(after.channel.id) + ">")
-            embed.add_field(name="参加者", value="<@!" + str(member.id) + ">")
-
             if after.channel is not None:
                 await bot.get_channel(int(RoomID)).send(embed=embed)
 
