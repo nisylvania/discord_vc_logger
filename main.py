@@ -16,7 +16,7 @@ async def on_ready():
 
 @bot.event
 async def on_voice_state_update(member, before, after):
-    if member.bot == False:
+    if member.bot == False and member.guild.system_channel:
         if before.channel != after.channel:
             RoomID = member.guild.system_channel.id
             embed = discord.Embed(
@@ -30,6 +30,9 @@ async def on_voice_state_update(member, before, after):
 
             if after.channel is not None:
                 await bot.get_channel(int(RoomID)).send(embed=embed)
+
+    elif member.guild.system_channel is None:
+        member.guild.owner.send('サーバー：' + member.guild.name + 'のシステムチャンネルが設定されていないため、VC入退室通知を送信することができません。')
 
 
 if __name__ == "__main__":
