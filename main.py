@@ -22,7 +22,7 @@ async def on_voice_state_update(member, before, after):
             embed = discord.Embed(
                 color=member.color
             )
-            embed.set_author(name=member.name + 'がVCに入室しました',
+            embed.set_author(name=member.display_name + 'がVCに入室しました！',
                             icon_url=member.avatar_url)
             embed.add_field(name="参加チャンネル", value="<#" +
                             str(after.channel.id) + ">")
