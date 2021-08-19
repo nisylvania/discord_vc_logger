@@ -16,21 +16,21 @@ async def on_ready():
 
 @bot.event
 async def on_voice_state_update(member, before, after):
-    if member.bot == False and member.guild.system_channel:
+    if member.bot == False and member.guild.system_channel and after.channel is not None and before.channel is None:
         if before.channel != after.channel:
             RoomID = member.guild.system_channel.id
             embed = discord.Embed(
+                title=member.display_name + 'がVCに入室しました！',
+                description="入室チャンネルは" + "<#" + str(after.channel.id) + ">です。",
                 color=member.color
             )
-            embed.set_author(name=member.display_name + 'がVCに入室しました！',
-                            icon_url=member.avatar_url)
-            embed.add_field(name="参加チャンネル", value="<#" +
-                            str(after.channel.id) + ">")
-            if after.channel is not None:
-                await bot.get_channel(int(RoomID)).send(embed=embed)
+            embed.set_author(name="VC入室者",
+                             icon_url=member.avatar_url)
+            await bot.get_channel(int(RoomID)).send(embed=embed)
 
     elif member.guild.system_channel is None:
-        member.guild.owner.send('サーバー：' + member.guild.name + 'のシステムチャンネルが設定されていないため、VC入退室通知を送信することができません。')
+        member.guild.owner.send(
+            'サーバー：' + member.guild.name + 'のシステムチャンネルが設定されていないため、VC入退室通知を送信することができません。')
 
 
 if __name__ == "__main__":
