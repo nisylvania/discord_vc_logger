@@ -35,7 +35,7 @@ async def on_voice_state_update(member, before, after):
                     RoomID = member.guild.system_channel.id
                     embed = discord.Embed(
                         title=member.display_name + 'がVCに退室しました！',
-                        description="退室元チャンネルは" + "<#" + str(after.channel.id) + ">です。",
+                        description="退室元チャンネルは" + "<#" + str(before.channel.id) + ">です。",
                         color=member.color
                         )
                     embed.set_author(name="VC退室者",
