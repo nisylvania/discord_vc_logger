@@ -19,14 +19,13 @@ async def on_voice_state_update(member, before, after):
                 if before.channel != after.channel:
                     RoomID = member.guild.system_channel.id
                     embed = discord.Embed(
-                        title=member.display_name + 'がVCに入室しました！',
-                        description="入室チャンネルは" + "<#" + str(after.channel.id) + ">です。",
+                        title=member.display_name + "が" + after.channel.name + 'に入室しました！',
+                        description="現在の参加者数は" + str(len(after.channel.members)) + "人です。",
                         color=member.color
                         )
-                    embed.set_author(name="VC入室者",
+                    embed.set_author(name="VC入室",
                                     icon_url=member.avatar_url)
                     await bot.get_channel(int(RoomID)).send(embed=embed)
-                break
     
     elif member.bot == False and member.guild.system_channel and after.channel is None and before.channel is not None: # 退室について
         for role in member.roles:
@@ -34,17 +33,17 @@ async def on_voice_state_update(member, before, after):
                 if before.channel != after.channel:
                     RoomID = member.guild.system_channel.id
                     embed = discord.Embed(
-                        title=member.display_name + 'がVCに退室しました！',
-                        description="退室元チャンネルは" + "<#" + str(before.channel.id) + ">です。",
+                        title=member.display_name + "が" + before.channel.name + 'から退室しました！',
+                        description="現在の参加者数は" + str(len(before.channel.members)) + "人です。",
                         color=member.color
                         )
-                    embed.set_author(name="VC退室者",
+                    embed.set_author(name="VC退室",
                                     icon_url=member.avatar_url)
                     await bot.get_channel(int(RoomID)).send(embed=embed)
                 break
 
     elif member.guild.system_channel is None:
-        member.guild.owner.send(
+        await member.guild.owner.send(
             'サーバー：' + member.guild.name + 'のシステムチャンネルが設定されていないため、VC入退室通知を送信することができません。')
 
 
