@@ -1,6 +1,7 @@
 const { Client, Intents, MessageEmbed } = require('discord.js')
 const client = new Client({ intents: Object.keys(Intents.FLAGS) })
 require('dotenv').config();
+const moment = require('moment');
 
 const send_vc_notify = (voicestate, is_exit) => {
     const displayColor = voicestate.member.displayColor;
@@ -9,8 +10,8 @@ const send_vc_notify = (voicestate, is_exit) => {
     const displayAvatarURL = voicestate.member.displayAvatarURL();
     const ChannelMemberSize = voicestate.channel.members.size;
     const Embed = new MessageEmbed();
-    const date_b = new Date()
-    const date = date_b.toLocaleString('ja-JP', { hour12: false });
+    const date = moment(new Date()).format('Y/M/D H:mm:ss');
+    
 
 
     Embed.setColor(displayColor);
