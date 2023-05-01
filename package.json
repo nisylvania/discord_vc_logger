@@ -13,6 +13,6 @@
   "author": "nisylvania",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^13.6.0"
+    "discord.js": "^14.9.0"
   }
 }
