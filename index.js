@@ -94,7 +94,7 @@ client.on("interactionCreate", async (interaction) => {
         await interaction.reply({ content: 'これからはあなたのVC入室時に通知します！', ephemeral: true });
     }
     if (interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
-        
+
         const entry = interaction.guild.roles.cache.find(role => role.name === 'VC Entry');
         const exit = interaction.guild.roles.cache.find(role => role.name === 'VC Exit');
         const streaming = interaction.guild.roles.cache.find(role => role.name === 'VC Streaming');
@@ -144,13 +144,14 @@ client.on("interactionCreate", async (interaction) => {
             }
         }
     }
-    else{
+    else {
         await interaction.reply({ content: 'このBotにロールを管理する権限がないようです！', ephemeral: true });
     }
 });
 
 client.once('ready', () => {
     console.log('ログインしました。');
+    console.log('当Botが参加しているサーバー：' + client.guilds.cache.map(guild => guild.name));
 
     const entry = new SlashCommandBuilder()
         .setName('entry')
