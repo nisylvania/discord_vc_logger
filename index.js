@@ -43,6 +43,20 @@ const getGuild = async (guildID) => {
     return rows
 }
 
+const registerGuild = async (guildID, channelID, vc_entry, vc_exit, vc_streaming, guildName) => {
+    await createConnection()
+    const [result, filelds] = await clientSql.query(`INSERT INTO guild VALUES ('${guildID}', '${channelID}', '${vc_entry}', '${vc_exit}', '${vc_streaming}', '${guildName}')`)
+    await clientSql.end()
+    return result
+}
+
+const updateGuild = async (guildID, channelID, vc_entry, vc_exit, vc_streaming, guildName) => {
+    await createConnection()
+    const [result, filelds] = await clientSql.query(`UPDATE guild SET channelID='${channelID}', vc_entry='${vc_entry}', vc_exit='${vc_exit}', vc_streaming='${vc_streaming}', guildName='${guildName}' WHERE guildID='${guildID}'`)
+    await clientSql.end()
+    return result
+}
+
 const send_vc_notify = async (voicestate, is_exit, entry, exit) => { //入室・退室の送信関数
     const displayColor = voicestate.member.displayColor;
     const displayName = voicestate.member.displayName;
@@ -74,7 +88,7 @@ const send_vc_notify = async (voicestate, is_exit, entry, exit) => { //入室・
         await registerEntering(id, date, channelID, message.id); //ユーザID，入室日時，メッセージIDを格納→在室時間の判定に使用
     }
     else if (is_exit == false && entry == false) { //VC Entryを付与されていないVC入室時の処理　つまりDB登録のみ
-        await registerEntering(id, date, 0,0); //ユーザID，入室日時，メッセージを格納→在室時間の判定に使用
+        await registerEntering(id, date, 0, 0); //ユーザID，入室日時，メッセージを格納→在室時間の判定に使用
     }
     else if (is_exit == true && (exit == true && entry == true) || (exit == true && entry == false)) { //VC Exitを付与されているVC退室時の処理　つまり新規送信
         const entering = await getEntering(id);
@@ -205,8 +219,9 @@ client.on('voiceStateUpdate', async (oldState, newState) => { //ボイスチャ�
 client.on("interactionCreate", async (interaction) => { //コマンド実行で発火
     if (!interaction.isChatInputCommand()) return;
 
-    if (interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
-        const guild = await getGuild(interaction.guild.id);
+    const guild = await getGuild(interaction.guild.id);
+
+    if (interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageRoles) && (interaction.commandName === 'entry' || interaction.commandName === 'exit' || interaction.commandName === 'streaming') && guild.length > 0) {
         const entry_db = guild[0].vc_entry;
         const exit_db = guild[0].vc_exit;
         const streaming_db = guild[0].vc_streaming;
@@ -259,15 +274,37 @@ client.on("interactionCreate", async (interaction) => { //コマンド実行で�
                 await interaction.reply({ content: 'これからはあなたのVC画面共有時に通知しません！', ephemeral: true });
             }
         }
-        else if (interaction.commandName === 'stop') {
-            if (!interaction.replied) {
-                await interaction.reply({ content: 'このBotを停止させます。', ephemeral: true });
-                client.destroy;
-            }
+    }
+    else if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageRoles) && (interaction.commandName === 'entry' || interaction.commandName === 'exit' || interaction.commandName === 'streaming') && guild.length > 0) {
+        await interaction.reply({ content: 'このBotにロールを管理する権限がないようです！', ephemeral: true });
+    }
+    else if ((interaction.commandName === 'entry' || interaction.commandName === 'exit' || interaction.commandName === 'streaming') && guild.length === 0) {
+        await interaction.reply({ content: 'このサーバは登録されていません！/registerコマンドで登録してください！', ephemeral: true });
+    }
+
+    else if (interaction.commandName === 'register' && guild.length === 0) { //サーバ登録
+        const channelID = interaction.options.getChannel('channel').id;
+        const vc_entry = interaction.options.getRole('vc_entry').name;
+        const vc_exit = interaction.options.getRole('vc_exit').name;
+        const vc_streaming = interaction.options.getRole('vc_streaming').name;
+
+        await registerGuild(interaction.guild.id, channelID, vc_entry, vc_exit, vc_streaming, interaction.guild.name);
+
+        if (!interaction.replied) {
+            await interaction.reply({ content: 'サーバを登録しました！', ephemeral: true });
         }
     }
-    else {
-        await interaction.reply({ content: 'このBotにロールを管理する権限がないようです！', ephemeral: true });
+    else if (interaction.commandName === 'register' && guild.length > 0) { //サーバ更新
+        const channelID = interaction.options.getChannel('channel').id;
+        const vc_entry = interaction.options.getRole('vc_entry').name;
+        const vc_exit = interaction.options.getRole('vc_exit').name;
+        const vc_streaming = interaction.options.getRole('vc_streaming').name;
+
+        await updateGuild(interaction.guild.id, channelID, vc_entry, vc_exit, vc_streaming, interaction.guild.name);
+
+        if (!interaction.replied) {
+            await interaction.reply({ content: 'サーバ登録を更新しました！', ephemeral: true });
+        }
     }
 });
 
@@ -360,7 +397,31 @@ client.once('ready', () => { //Bot準備完了時に発火
                 .setRequired(true)
         );
 
-    const commands = [entry, exit, streaming];
+    const register = new SlashCommandBuilder()
+        .setName('register')
+        .setDescription('サーバを登録し，通知を送信するチャンネルやロール名を設定します。コマンドの実行はあなたにしか見えません。')
+        .addChannelOption(option =>
+            option.setName('channel')
+                .setDescription('通知を送信するチャンネル')
+                .setRequired(true)
+        )
+        .addRoleOption(option =>
+            option.setName('vc_entry')
+                .setDescription('入室時に通知を送信するロール')
+                .setRequired(true)
+        )
+        .addRoleOption(option =>
+            option.setName('vc_exit')
+                .setDescription('退室時に通知を送信するロール')
+                .setRequired(true)
+        )
+        .addRoleOption(option =>
+            option.setName('vc_streaming')
+                .setDescription('画面共有時に通知を送信するロール')
+                .setRequired(true)
+        );
+
+    const commands = [entry, exit, streaming, register];
     const { REST, Routes } = require("discord.js");
     const rest = new REST({ version: '10' }).setToken(process.env.DISCODE_TOKEN)
     async function main() {
