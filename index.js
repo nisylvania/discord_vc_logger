@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Partials, EmbedBuilder, SlashCommandBuilder, GuildMemberManager, PermissionsBitField, ButtonBuilder, ButtonStyle, ActionRowBuilder, DMChannel } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, EmbedBuilder, SlashCommandBuilder, GuildMemberManager, PermissionsBitField, ButtonBuilder, ButtonStyle, ActionRowBuilder, DMChannel, ChannelType } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages, GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildScheduledEvents, GatewayIntentBits.GuildPresences], partials: [Partials.Channel] });
 require('dotenv').config();
 const moment = require('moment');
@@ -403,6 +403,7 @@ client.once('ready', () => { //Bot準備完了時に発火
         .addChannelOption(option =>
             option.setName('channel')
                 .setDescription('通知を送信するチャンネル')
+                .addChannelTypes(ChannelType.GuildText)
                 .setRequired(true)
         )
         .addRoleOption(option =>
